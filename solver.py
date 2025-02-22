@@ -20,8 +20,7 @@ class Solver():
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
         if args.checkpoint and not eval:
-            checkpoint = torch.load(os.path.join(args.checkpoint), map_location=self.device)
-            
+            checkpoint = torch.load(os.path.join(args.checkpoint), map_location=self.device, weights_only=True)            
             self.model.load_state_dict(checkpoint)
             
         elif not eval:
@@ -144,7 +143,7 @@ class Solver():
             self.evaluation(eval_data, filename='val_data_after_training')
 
             
-    def evaluation(self, eval_dataset: Dataset):
+    def evaluation(self, eval_dataset: Dataset, filename=''):
         """
         Estimate the standard error on the provided dataset and write it to evaluation_val.txt in the run directory
         Args:
@@ -191,7 +190,7 @@ class Solver():
             test_pred = np.concatenate(test_pred)
             test_acc = metrics.accuracy_score(test_true, test_pred)
             avg_per_class_acc = metrics.balanced_accuracy_score(test_true, test_pred)
-            outstr = 'Test acc: %.6f, Test avg acc: %.6f' % (test_acc,avg_per_class_acc)
+            outstr = '%s acc: %.6f, Test avg acc: %.6f' % (filename, test_acc, avg_per_class_acc)
             io.cprint(outstr)
                 
 
@@ -254,7 +253,7 @@ class Solver():
         prediction_result['sequence'] = [s for i in sequences for s in i]
         prediction_result['predict_result'] = [a for i in predictions for s in i for a in s]
         
-        prediction_result.to_csv('protTrans_prediction_result.csv')
+        prediction_result.to_csv(self.args.out_file, index=False)
        
     def save_checkpoint(self, epoch: int):
         """

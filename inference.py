@@ -44,6 +44,8 @@ def parse_arguments():
                    help='cutoff similarity for when to do lookup and when to use denovo predictions. If negative, denovo predictions will always be used.')
     p.add_argument('--key_format', type=str, default='hash',
                    help='the formatting of the keys in the h5 file [fasta_descriptor_old, fasta_descriptor, hash]')
+    p.add_argument('--out_file', type=str, help='Out file')
+    p.add_argument('--train_arguments', type=str, help='Training arguments file', default='./model_param/train_arguments.yml')
 
 
     args = p.parse_args()
@@ -67,7 +69,7 @@ if __name__ == '__main__':
         arg_dict = args.__dict__
         arg_dict['checkpoint'] = checkpoint
         # get the arguments from the yaml config file that is saved in the runs checkpoint
-        data = yaml.load(open(os.path.join('./model_param/train_arguments.yml'), 'r'), Loader=yaml.FullLoader)
+        data = yaml.load(open(os.path.join(args.train_arguments), 'r'), Loader=yaml.FullLoader)
         for key, value in data.items():
             if key not in args.__dict__.keys():
                 if isinstance(value, list):
